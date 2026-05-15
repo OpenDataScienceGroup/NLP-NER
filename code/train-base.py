@@ -7,13 +7,13 @@ from seqeval.metrics import f1_score
 from typing import List, Dict, Tuple
 
 import json
-TRAIN_PATH  = "train.jsonl"
-DEV_PATH    = "dev.jsonl"
-TEST_PATH   = "test.jsonl"
+TRAIN_PATH  = "../data/train.jsonl"
+DEV_PATH    = "../data/dev.jsonl"
+TEST_PATH   = "../data/test.jsonl"
 MODEL_NAME  = "bert-base-cased"
 MAX_LENGTH  = 128
 BATCH_SIZE  = 16
-EPOCHS      = 6
+EPOCHS      = 3
 LR          = 3e-5
 WARMUP_FRAC = 0.1
 
@@ -177,7 +177,7 @@ def main():
             for batch in dev_loader:
                 output = model(
                     input_ids=batch["input_ids"].to(device),
-                    attention_mask=batch["attention_mask"].to(device),
+                    attention_mask=batch["attention_mask"].to(device),  
                     token_type_ids=batch.get("token_type_ids",
                                              torch.zeros_like(batch["input_ids"])).to(device),
                     labels=batch["labels"].to(device),
@@ -244,6 +244,6 @@ def main():
             sent_labels.append(id2label[all_preds[i][token_idx]])
         pred_labels_list.append(sent_labels)
     pred_ids_list = [[label2id[label] for label in sent] for sent in pred_labels_list]
-    write_jsonl("test_out.txt", test_words, pred_ids_list)
+    write_jsonl("test_pred_base.jsonl", test_words, pred_ids_list)
 if __name__ == "__main__":
     main()
