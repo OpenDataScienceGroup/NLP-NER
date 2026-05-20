@@ -89,9 +89,11 @@ def iaa(files:dict):
 
 
 files = {
-    "Hjalte":load_jsonl("../data/Hjalte_500.jsonl"),
-    "Marius":load_jsonl("../data/mar_500.jsonl"),
-    "Valantis":load_jsonl("../data/val_500.jsonl"),
+    "1":load_jsonl("../data/Hjalte_500.jsonl"),
+    "2":load_jsonl("../data/mar_500.jsonl"),
+    "3":load_jsonl("../data/val_500.jsonl")#,
+    #"Gold":load_jsonl("../data/test.jsonl"),
+    #"bertweet":load_jsonl("../data/bertweet_pred.jsonl")
 }
 
 results = iaa(files)
