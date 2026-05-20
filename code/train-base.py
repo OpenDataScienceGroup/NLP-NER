@@ -106,13 +106,13 @@ class TestDataset(Dataset):
     def __getitem__(self, idx):
         return {k: torch.tensor(v[idx]) for k, v in self.encodings.items()
                 if k != "offset_mapping"}
-def write_jsonl(path: str, tokens: List, predictions: List) -> None:
+def write_jsonl(path: str, tokens: List, predictions: List,probabilities: List) -> None:
     if len(predictions) != len(tokens):
         raise ValueError("Predictions list and tokens list must have the same number of sentences.")
 
     with open(path, 'w', encoding='utf-8') as f:
-        for tags, tokens in zip(predictions, tokens):
-            line = {"tags": tags, "tokens": tokens}
+        for tags, tokens,probs in zip(predictions, tokens,probabilities ):
+            line = {"tags": tags, "tokens": tokens, "probabilities":probs}
             f.write(json.dumps(line, ensure_ascii=False) + "\n")
     print(f"Predictions written to {path} ({len(tokens)} sentences)")
 def main():
@@ -220,6 +220,8 @@ def main():
 
     model.eval()
     all_preds = []
+    all_probs = []
+    
     num_batches = len(test_loader)
     with torch.no_grad():
         for step, batch in enumerate(test_loader, 1):
@@ -229,21 +231,33 @@ def main():
                 token_type_ids=batch.get("token_type_ids",
                                torch.zeros_like(batch["input_ids"])).to(device),
             )["logits"]
+            probs = torch.softmax(logits, dim=-1)
             all_preds.extend(torch.argmax(logits, dim=-1).cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
             if step % 100 == 0 or step == num_batches:
                 print(f"  Inference batch {step}/{num_batches}")
 
     pred_labels_list = []
+    probabilities_list = []
     for i, words in enumerate(test_words):
         word_ids = test_dataset.encodings.word_ids(batch_index=i)
         seen, sent_labels = set(), []
+        sent_probs = []
         for token_idx, word_id in enumerate(word_ids):
             if word_id is None or word_id in seen:
                 continue
             seen.add(word_id)
             sent_labels.append(id2label[all_preds[i][token_idx]])
+            prob_dict = {
+            label: round(float(all_probs[i][token_idx][j]), 6)
+            for j, label in enumerate(id2label)}
+            sorted_probs = sorted(prob_dict, key= lambda x: prob_dict[x],reverse=True)
+            top_2 = {sorted_probs[0]:prob_dict[sorted_probs[0]],sorted_probs[1]:prob_dict[sorted_probs[1]]}
+            sent_probs.append(top_2)
         pred_labels_list.append(sent_labels)
+        probabilities_list.append(sent_probs)
+     
     pred_ids_list = [[label2id[label] for label in sent] for sent in pred_labels_list]
-    write_jsonl("test_pred_base.jsonl", test_words, pred_ids_list)
+    write_jsonl("test_pred_base.jsonl", test_words, pred_ids_list,probabilities_list)
 if __name__ == "__main__":
     main()
