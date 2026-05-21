@@ -130,6 +130,7 @@ if __name__ == '__main__':
     _,bertweet_pred = readjson("bertweet_pred_test.jsonl")
     _,hjalte_pred = readjson("../data/Hjalte_500.jsonl")
     _,val_pred = readjson("../data/val_500.jsonl")
+    _,mar_pred = readjson("../data/mar_500.jsonl")
     print("F1 FOR BASELINE\n")
     F1(gold,base_pred)
     print("-------------------------------")
@@ -141,6 +142,10 @@ if __name__ == '__main__':
     print("-------------------------------")
     print("F1 for Valantis\n")
     F1(gold[:500],val_pred)
+    print("-------------------------------")
+    print("F1 for Marius\n")
+    F1(gold[:500],mar_pred)
+
 
 
 
