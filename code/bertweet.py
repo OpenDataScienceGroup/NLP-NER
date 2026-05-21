@@ -20,9 +20,7 @@ print(type(tokenizer))
 print("Fast tokenizer:", tokenizer.is_fast)
 
 
-# -----------------------------
 # Load JSONL
-# -----------------------------
 def parse_jsonl(filename):
     tokens_list = []
     tags_list = []
@@ -34,9 +32,7 @@ def parse_jsonl(filename):
     return tokens_list, tags_list
 
 
-# -----------------------------
 # Write JSONL
-# -----------------------------
 def write_jsonl(path, tokens, predictions, probabilities):
     with open(path, "w", encoding="utf-8") as f:
         for tags, toks, probs in zip(predictions, tokens, probabilities):
@@ -45,9 +41,7 @@ def write_jsonl(path, tokens, predictions, probabilities):
     print(f"Predictions written to {path}")
 
 
-# -----------------------------
 # Load test data
-# -----------------------------
 test_words, _ = parse_jsonl(TEST_PATH)
 print(f"Loaded {len(test_words)} test sentences, running inference ...")
 
